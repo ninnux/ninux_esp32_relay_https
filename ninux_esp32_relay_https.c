@@ -3,25 +3,15 @@
 #include "driver/gpio.h"
 
 static const char *TAG = "ninux https";
-#define GPIO_PORTS ((1ULL<<18)|(1ULL<<19))
-void my_gpio_init(int ioports){
-    gpio_config_t io_conf;
-    //disable interrupt
-    io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
-    //set as output mode
-    io_conf.mode = GPIO_MODE_OUTPUT;
-    //bit mask of the pins that you want to set,e.g.GPIO18/19
-    //io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
-    io_conf.pin_bit_mask = ioports;
-    //disable pull-down mode
-    io_conf.pull_down_en = 0;
-    //disable pull-up mode
-    io_conf.pull_up_en = 0;
-    //configure GPIO with the given settings
-    gpio_config(&io_conf);
-}
+
+#define ZERO_PIN 23
+#define ONE_PIN 17 
+
 
 void gpio_out(int ioport,int value){
+    gpio_pad_select_gpio(ioport);
+    /* Set the GPIO as a push/pull output */
+    gpio_set_direction(ioport, GPIO_MODE_OUTPUT);
     gpio_set_level(ioport, value);
 }
 
@@ -42,7 +32,7 @@ else{
 static esp_err_t zero_on_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(18,1);
+    gpio_out(ZERO_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 on</h1>", -1); // -1 = use strlen()
 }
@@ -55,7 +45,7 @@ else{
 static esp_err_t zero_off_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(18,0);
+    gpio_out(ZERO_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 off</h1>", -1); // -1 = use strlen()
 }
@@ -68,9 +58,9 @@ else{
 static esp_err_t zero_reset_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(18,0);
+    gpio_out(ZERO_PIN,1);
     vTaskDelay(10000 / portTICK_PERIOD_MS);
-    gpio_out(18,0);
+    gpio_out(ZERO_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 reset</h1>", -1); // -1 = use strlen()
 }
@@ -84,7 +74,7 @@ else{
 static esp_err_t one_on_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(19,1);
+    gpio_out(ONE_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 on</h1>", -1); // -1 = use strlen()
 }
@@ -97,7 +87,7 @@ else{
 static esp_err_t one_off_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(19,0);
+    gpio_out(ONE_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 off</h1>", -1); // -1 = use strlen()
 }
@@ -110,11 +100,39 @@ else{
 static esp_err_t one_reset_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
-    gpio_out(19,0);
+    gpio_out(ONE_PIN,1);
     vTaskDelay(10000 / portTICK_PERIOD_MS);
-    gpio_out(19,0);
+    gpio_out(ONE_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 reset</h1>", -1); // -1 = use strlen()
+}
+else{
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
+}
+    return ESP_OK;
+}
+static esp_err_t all_on_handler(httpd_req_t *req)
+{
+if(!esp32_web_basic_auth(req)){
+    gpio_out(ONE_PIN,0);
+    gpio_out(ZERO_PIN,0);
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, "<h1>all off</h1>", -1); // -1 = use strlen()
+}
+else{
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
+}
+    return ESP_OK;
+}
+static esp_err_t all_off_handler(httpd_req_t *req)
+{
+if(!esp32_web_basic_auth(req)){
+    gpio_out(ONE_PIN,1);
+    gpio_out(ZERO_PIN,1);
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, "<h1>all off</h1>", -1); // -1 = use strlen()
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -159,10 +177,23 @@ static const httpd_uri_t one_off = {
     .handler   = one_off_handler
 };
 
+
 static const httpd_uri_t one_reset = {
     .uri       = "/1/reset",
     .method    = HTTP_GET,
     .handler   = one_reset_handler
+};
+
+static const httpd_uri_t all_on = {
+    .uri       = "/all/on",
+    .method    = HTTP_GET,
+    .handler   = all_on_handler
+};
+
+static const httpd_uri_t all_off = {
+    .uri       = "/all/off",
+    .method    = HTTP_GET,
+    .handler   = all_off_handler
 };
 
 static httpd_handle_t start_webserver(void)
@@ -189,7 +220,7 @@ static httpd_handle_t start_webserver(void)
         ESP_LOGI(TAG, "Error starting server!");
         return NULL;
     }
-    my_gpio_init(GPIO_PORTS);
+    //my_gpio_init(GPIO_PORTS);
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
     httpd_register_uri_handler(server, &root);
@@ -199,6 +230,8 @@ static httpd_handle_t start_webserver(void)
     httpd_register_uri_handler(server, &one_on);
     httpd_register_uri_handler(server, &one_off);
     httpd_register_uri_handler(server, &one_reset);
+    httpd_register_uri_handler(server, &all_on);
+    httpd_register_uri_handler(server, &all_off);
     return server;
 }
 
