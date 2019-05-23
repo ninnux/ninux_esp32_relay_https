@@ -223,7 +223,7 @@ static httpd_handle_t start_webserver(void)
     //my_gpio_init(GPIO_PORTS);
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
-    httpd_register_uri_handler(server, &root);
+    //httpd_register_uri_handler(server, &root);
     httpd_register_uri_handler(server, &zero_on);
     httpd_register_uri_handler(server, &zero_off);
     httpd_register_uri_handler(server, &zero_reset);
