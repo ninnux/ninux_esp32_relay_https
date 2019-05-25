@@ -20,14 +20,16 @@ extern EventGroupHandle_t wifi_event_group;
 extern const int CONNECTED_BIT;
 
 
-static esp_err_t root_get_handler(httpd_req_t *req);
+static esp_err_t update_get_handler(httpd_req_t *req);
+static esp_err_t zero_on_handler(httpd_req_t *req);
+static esp_err_t zero_off_handler(httpd_req_t *req);
+static esp_err_t zero_reset_handler(httpd_req_t *req);
 
-//static const httpd_uri_t root = {
-//    .uri       = "/",
-//    .method    = HTTP_GET,
-//    .handler   = root_get_handler
-//};
+static esp_err_t one_on_handler(httpd_req_t *req);
+static esp_err_t one_off_handler(httpd_req_t *req);
+static esp_err_t one_reset_handler(httpd_req_t *req);
 
+static esp_err_t all_off_handler(httpd_req_t *req);
 
 void gpio_out(int ioport,int value);
 static httpd_handle_t start_webserver(void);
