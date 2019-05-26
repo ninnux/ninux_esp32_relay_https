@@ -1,6 +1,7 @@
 
 #include "ninux_esp32_relay_https.h"
 #include "ninux_esp32_ota.h"
+#include "ninux_esp32_mqtt.h"
 #include "driver/gpio.h"
 
 static const char *TAG_HTTP = "ninux https";
@@ -38,6 +39,7 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ZERO_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 on</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","on");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -51,6 +53,7 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ZERO_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 off</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","off");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -66,6 +69,8 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ZERO_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>0 reset</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","off");
+    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","on");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -80,6 +85,7 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ONE_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 on</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","on");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -93,6 +99,7 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ONE_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 off</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("cofftrollo/lampadasanfelice/ports/1","off");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -108,6 +115,8 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ONE_PIN,1);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>1 reset</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("cofftrollo/lampadasanfelice/ports/1","off");
+    ninux_mqtt_publish("cofftrollo/lampadasanfelice/ports/1","on");
 }
 else{
     httpd_resp_set_type(req, "text/html");
@@ -136,6 +145,8 @@ if(!esp32_web_basic_auth(req)){
     gpio_out(ZERO_PIN,0);
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>all off</h1>", -1); // -1 = use strlen()
+    ninux_mqtt_publish("cofftrollo/lampadasanfelice/ports/0","off");
+    ninux_mqtt_publish("cofftrollo/lampadasanfelice/ports/1","off");
 }
 else{
     httpd_resp_set_type(req, "text/html");
