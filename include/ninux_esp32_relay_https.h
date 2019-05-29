@@ -4,6 +4,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#define MAX_PORT 1
+#define MIN_PORT 0
 
 //#include <esp_wifi.h>
 //#include <esp_event_loop.h>
