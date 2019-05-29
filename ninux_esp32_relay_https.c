@@ -17,7 +17,59 @@ void gpio_out(int ioport,int value){
     gpio_set_level(ioport, value);
 }
 
-/* An HTTP GET handler */
+void do_action(char* portstr,char* action){
+	int port;
+	int i;
+	if(strcmp(portstr,"all")==0){
+		//for(i=MIN_PORT;i<MAX_PORT+1;i++){
+		//	do_action((char*)i,action);
+		//}
+		if(strcmp(action,"on")==0){
+			gpio_out(ZERO_PIN,0);
+			gpio_out(ONE_PIN,0);
+		}
+		if(strcmp(action,"off")==0){
+			gpio_out(ZERO_PIN,1);
+			gpio_out(ONE_PIN,1);
+		}
+		if(strcmp(action,"reset")==0){
+			gpio_out(ZERO_PIN,1);
+			gpio_out(ONE_PIN,1);
+			vTaskDelay(10000 / portTICK_PERIOD_MS);
+			gpio_out(ZERO_PIN,0);
+			gpio_out(ONE_PIN,0);
+		}
+		
+	}else{
+        port=atoi(portstr);
+        if(port <= MAX_PORT && port >= MIN_PORT ){
+		if(port==0 && strcmp(action,"on")==0){
+			gpio_out(ZERO_PIN,0);
+		}
+		if(port==0 && strcmp(action,"off")==0){
+			gpio_out(ZERO_PIN,1);
+		}
+		if(port==0 && strcmp(action,"reset")==0){
+			gpio_out(ZERO_PIN,1);
+			vTaskDelay(10000 / portTICK_PERIOD_MS);
+			gpio_out(ZERO_PIN,0);
+		}
+		if(port==1 && strcmp(action,"on")==0){
+			gpio_out(ONE_PIN,0);
+		}
+		if(port==1 && strcmp(action,"off")==0){
+			gpio_out(ONE_PIN,1);
+		}
+		if(port==1 && strcmp(action,"reset")==0){
+			gpio_out(ONE_PIN,1);
+			vTaskDelay(10000 / portTICK_PERIOD_MS);
+			gpio_out(ONE_PIN,0);
+		}
+	}
+	}
+}
+
+///* An HTTP GET handler */
 static esp_err_t update_get_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
@@ -33,170 +85,57 @@ else{
     return ESP_OK;
 }
 
-static esp_err_t zero_on_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ZERO_PIN,1);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>0 on</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","on");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t zero_off_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ZERO_PIN,0);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>0 off</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","off");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t zero_reset_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ZERO_PIN,0);
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
-    gpio_out(ZERO_PIN,1);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>0 reset</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","off");
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","on");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-
-static esp_err_t one_on_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ONE_PIN,1);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>1 on</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","on");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t one_off_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ONE_PIN,0);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>1 off</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","off");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t one_reset_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ONE_PIN,0);
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
-    gpio_out(ONE_PIN,1);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>1 reset</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","off");
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","on");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t all_on_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ONE_PIN,1);
-    gpio_out(ZERO_PIN,1);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>all off</h1>", -1); // -1 = use strlen()
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-static esp_err_t all_off_handler(httpd_req_t *req)
-{
-if(!esp32_web_basic_auth(req)){
-    gpio_out(ONE_PIN,0);
-    gpio_out(ZERO_PIN,0);
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>all off</h1>", -1); // -1 = use strlen()
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/0","off");
-    ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","off");
-}
-else{
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
-}
-    return ESP_OK;
-}
-
-
-static esp_err_t ports_management_handler(httpd_req_t *req)
+static esp_err_t port_management_handler(httpd_req_t *req)
 {
 if(!esp32_web_basic_auth(req)){
     char myuri[512];
     char http_message[512];
     char command[8];
     char *campo;
+    char portstr[8];
+    char mqtt_topic[512];
     int port;
     bzero(http_message,sizeof(http_message));
-    memncpy(myurl,req.uri,sizeof(myurl));
-    campo=strtok(myuri,"/")
-    if(strcmp(campo,"ports"){
-        campo=strtok(NULL,"/")
-        if(port=<MAX_PORT && port >=MIN_PORT || strcmp(campo,"all")){
-            port=atoi(campo);
-            campo=strtok(NULL,"/")
-            if(strcmp(campo,"on") || strcmp(campo,"off") || strcmp(campo,"reset"){
-                do_action(port,campo);
+    bzero(mqtt_topic,sizeof(mqtt_topic));
+    memcpy(myuri,req->uri,sizeof(myuri));
+    campo=strtok(myuri,"/");
+    printf("campo:%s\n",campo);
+    if(strcmp(campo,"ports")==0){
+        campo=strtok(NULL,"/");
+    	printf("campo:%s\n",campo);
+	memcpy(portstr,campo,strlen(campo));
+        port=atoi(campo);
+        if((port <= MAX_PORT && port >= MIN_PORT )|| strcmp(campo,"all")==0){
+            campo=strtok(NULL,"/");
+    	    printf("campo:%s\n",campo);
+            if(strcmp(campo,"on")==0 || strcmp(campo,"off")==0 || strcmp(campo,"reset")==0){
+                do_action(portstr,campo);
+		printf("do_action %d %s\n",port,campo);
                 httpd_resp_set_type(req, "text/html");
-                sprintf(http_message,"<h1>%s %s</h1>",port,campo);
-                //ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","off");
+                sprintf(http_message,"<h1>%d %s</h1>",port,campo);
+                httpd_resp_send(req, http_message, -1);
+		sprintf(mqtt_topic,"controllo/lampadasanfelice/ports/%s",portstr);
+                ninux_mqtt_publish(mqtt_topic,campo);
             }else{
                 httpd_resp_set_type(req, "text/html");
                 httpd_resp_send(req, "<h1>command error</h1>", -1); // -1 = use strlen()
             }
 
-        }else{
+         }else{
                 httpd_resp_set_type(req, "text/html");
                 httpd_resp_send(req, "<h1>port unrecognized</h1>", -1); // -1 = use strlen()
-
-        }
-    }else{
+         }
+     }else{
         httpd_resp_set_type(req, "text/html");
         httpd_resp_send(req, "<h1>invalid path</h1>", -1); // -1 = use strlen()
 
-    }
+     }
 }
 else{
     httpd_resp_set_type(req, "text/html");
     httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
 }
+
     return ESP_OK;
 }
 
@@ -207,58 +146,8 @@ static const httpd_uri_t update = {
     .handler   = update_get_handler
 };
 
-
-static const httpd_uri_t zero_on = {
-    .uri       = "/0/on",
-    .method    = HTTP_GET,
-    .handler   = zero_on_handler
-};
-
-static const httpd_uri_t zero_off = {
-    .uri       = "/0/off",
-    .method    = HTTP_GET,
-    .handler   = zero_off_handler
-};
-
-static const httpd_uri_t zero_reset = {
-    .uri       = "/0/reset",
-    .method    = HTTP_GET,
-    .handler   = zero_reset_handler
-};
-
-static const httpd_uri_t one_on = {
-    .uri       = "/1/on",
-    .method    = HTTP_GET,
-    .handler   = one_on_handler
-};
-
-static const httpd_uri_t one_off = {
-    .uri       = "/1/off",
-    .method    = HTTP_GET,
-    .handler   = one_off_handler
-};
-
-
-static const httpd_uri_t one_reset = {
-    .uri       = "/1/reset",
-    .method    = HTTP_GET,
-    .handler   = one_reset_handler
-};
-
-static const httpd_uri_t all_on = {
-    .uri       = "/all/on",
-    .method    = HTTP_GET,
-    .handler   = all_on_handler
-};
-
-static const httpd_uri_t all_off = {
-    .uri       = "/all/off",
-    .method    = HTTP_GET,
-    .handler   = all_off_handler
-};
-
 static const httpd_uri_t port_management = {
-    .uri       = "/ports/",
+    .uri       = "/ports/*",
     .method    = HTTP_GET,
     .handler   = port_management_handler
 };
@@ -271,6 +160,7 @@ static httpd_handle_t start_webserver(void)
     ESP_LOGI(TAG_HTTP, "Starting server");
 
     httpd_ssl_config_t conf = HTTPD_SSL_CONFIG_DEFAULT();
+    conf.httpd.uri_match_fn = httpd_uri_match_wildcard;
 
     extern const unsigned char cacert_pem_start[] asm("_binary_cacert_pem_start");
     extern const unsigned char cacert_pem_end[]   asm("_binary_cacert_pem_end");
@@ -291,14 +181,7 @@ static httpd_handle_t start_webserver(void)
     // Set URI handlers
     ESP_LOGI(TAG_HTTP, "Registering URI handlers");
     httpd_register_uri_handler(server, &update);
-    httpd_register_uri_handler(server, &zero_on);
-    httpd_register_uri_handler(server, &zero_off);
-    httpd_register_uri_handler(server, &zero_reset);
-    httpd_register_uri_handler(server, &one_on);
-    httpd_register_uri_handler(server, &one_off);
-    httpd_register_uri_handler(server, &one_reset);
-    //httpd_register_uri_handler(server, &all_on);
-    httpd_register_uri_handler(server, &all_off);
+    httpd_register_uri_handler(server, &port_management);
     return server;
 }
 
