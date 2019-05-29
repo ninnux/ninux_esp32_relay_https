@@ -1,3 +1,5 @@
+#ifndef NINUX_RELAY_HTTPS
+#define NINUX_RELAY_HTTPS
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -36,3 +38,4 @@ static httpd_handle_t start_webserver(void);
 static void stop_webserver(httpd_handle_t server);
 void ninux_esp32_https_task(void * pvParameter);
 void ninux_esp32_https();
+#endif
