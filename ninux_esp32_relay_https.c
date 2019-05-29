@@ -154,6 +154,53 @@ else{
 }
     return ESP_OK;
 }
+
+
+static esp_err_t ports_management_handler(httpd_req_t *req)
+{
+if(!esp32_web_basic_auth(req)){
+    char myuri[512];
+    char http_message[512];
+    char command[8];
+    char *campo;
+    int port;
+    bzero(http_message,sizeof(http_message));
+    memncpy(myurl,req.uri,sizeof(myurl));
+    campo=strtok(myuri,"/")
+    if(strcmp(campo,"ports"){
+        campo=strtok(NULL,"/")
+        if(port=<MAX_PORT && port >=MIN_PORT || strcmp(campo,"all")){
+            port=atoi(campo);
+            campo=strtok(NULL,"/")
+            if(strcmp(campo,"on") || strcmp(campo,"off") || strcmp(campo,"reset"){
+                do_action(port,campo);
+                httpd_resp_set_type(req, "text/html");
+                sprintf(http_message,"<h1>%s %s</h1>",port,campo);
+                //ninux_mqtt_publish("controllo/lampadasanfelice/ports/1","off");
+            }else{
+                httpd_resp_set_type(req, "text/html");
+                httpd_resp_send(req, "<h1>command error</h1>", -1); // -1 = use strlen()
+            }
+
+        }else{
+                httpd_resp_set_type(req, "text/html");
+                httpd_resp_send(req, "<h1>port unrecognized</h1>", -1); // -1 = use strlen()
+
+        }
+    }else{
+        httpd_resp_set_type(req, "text/html");
+        httpd_resp_send(req, "<h1>invalid path</h1>", -1); // -1 = use strlen()
+
+    }
+}
+else{
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, "<h1>Culo2!</h1>", -1); // -1 = use strlen()
+}
+    return ESP_OK;
+}
+
+
 static const httpd_uri_t update = {
     .uri       = "/update",
     .method    = HTTP_GET,
@@ -208,6 +255,12 @@ static const httpd_uri_t all_off = {
     .uri       = "/all/off",
     .method    = HTTP_GET,
     .handler   = all_off_handler
+};
+
+static const httpd_uri_t port_management = {
+    .uri       = "/ports/",
+    .method    = HTTP_GET,
+    .handler   = port_management_handler
 };
 
 static httpd_handle_t start_webserver(void)
