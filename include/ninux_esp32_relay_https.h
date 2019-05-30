@@ -4,8 +4,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#define MAX_PORT 1
-#define MIN_PORT 0
+//#define MAX_PORT 1
+//#define MIN_PORT 0
 
 //#include <esp_wifi.h>
 //#include <esp_event_loop.h>
@@ -36,7 +36,8 @@ static esp_err_t one_reset_handler(httpd_req_t *req);
 static esp_err_t all_off_handler(httpd_req_t *req);
 
 void gpio_out(int ioport,int value);
-static httpd_handle_t start_webserver(void);
+//static httpd_handle_t start_webserver(void);
+static httpd_handle_t start_webserver(httpd_uri_t * handlers[]);
 static void stop_webserver(httpd_handle_t server);
 void ninux_esp32_https_task(void * pvParameter);
 void ninux_esp32_https();
