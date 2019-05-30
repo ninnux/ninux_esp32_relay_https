@@ -20,6 +20,8 @@ void gpio_out(int ioport,int value){
 void do_action(char* portstr,char* action){
 	int port;
 	int i;
+    	char mqtt_topic[512];
+    	bzero(mqtt_topic,sizeof(mqtt_topic));
 	if(strcmp(portstr,"all")==0){
 		//for(i=MIN_PORT;i<MAX_PORT+1;i++){
 		//	do_action((char*)i,action);
@@ -67,6 +69,8 @@ void do_action(char* portstr,char* action){
 		}
 	}
 	}
+	sprintf(mqtt_topic,"controllo/lampadasanfelice/ports/%s",portstr);
+        ninux_mqtt_publish(mqtt_topic,action);
 }
 
 ///* An HTTP GET handler */
@@ -93,10 +97,8 @@ if(!esp32_web_basic_auth(req)){
     char command[8];
     char *campo;
     char portstr[8];
-    char mqtt_topic[512];
     int port;
     bzero(http_message,sizeof(http_message));
-    bzero(mqtt_topic,sizeof(mqtt_topic));
     memcpy(myuri,req->uri,sizeof(myuri));
     campo=strtok(myuri,"/");
     printf("campo:%s\n",campo);
@@ -114,8 +116,6 @@ if(!esp32_web_basic_auth(req)){
                 httpd_resp_set_type(req, "text/html");
                 sprintf(http_message,"<h1>%d %s</h1>",port,campo);
                 httpd_resp_send(req, http_message, -1);
-		sprintf(mqtt_topic,"controllo/lampadasanfelice/ports/%s",portstr);
-                ninux_mqtt_publish(mqtt_topic,campo);
             }else{
                 httpd_resp_set_type(req, "text/html");
                 httpd_resp_send(req, "<h1>command error</h1>", -1); // -1 = use strlen()
